@@ -9,6 +9,7 @@ application {
     devDatabaseType h2Disk
   }
   entities TimeBooking
+  service * with serviceImpl
 }
 
 entity TimeBooking {

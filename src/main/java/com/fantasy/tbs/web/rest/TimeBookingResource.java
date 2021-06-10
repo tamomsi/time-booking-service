@@ -2,6 +2,7 @@ package com.fantasy.tbs.web.rest;
 
 import com.fantasy.tbs.domain.TimeBooking;
 import com.fantasy.tbs.repository.TimeBookingRepository;
+import com.fantasy.tbs.service.TimeBookingService;
 import com.fantasy.tbs.web.rest.errors.BadRequestAlertException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -22,7 +22,6 @@ import tech.jhipster.web.util.ResponseUtil;
  */
 @RestController
 @RequestMapping("/api")
-@Transactional
 public class TimeBookingResource {
 
     private final Logger log = LoggerFactory.getLogger(TimeBookingResource.class);
@@ -32,9 +31,12 @@ public class TimeBookingResource {
     @Value("${jhipster.clientApp.name}")
     private String applicationName;
 
+    private final TimeBookingService timeBookingService;
+
     private final TimeBookingRepository timeBookingRepository;
 
-    public TimeBookingResource(TimeBookingRepository timeBookingRepository) {
+    public TimeBookingResource(TimeBookingService timeBookingService, TimeBookingRepository timeBookingRepository) {
+        this.timeBookingService = timeBookingService;
         this.timeBookingRepository = timeBookingRepository;
     }
 
@@ -51,7 +53,7 @@ public class TimeBookingResource {
         if (timeBooking.getId() != null) {
             throw new BadRequestAlertException("A new timeBooking cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        TimeBooking result = timeBookingRepository.save(timeBooking);
+        TimeBooking result = timeBookingService.save(timeBooking);
         return ResponseEntity
             .created(new URI("/api/time-bookings/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -85,7 +87,7 @@ public class TimeBookingResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        TimeBooking result = timeBookingRepository.save(timeBooking);
+        TimeBooking result = timeBookingService.save(timeBooking);
         return ResponseEntity
             .ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, true, ENTITY_NAME, timeBooking.getId().toString()))
@@ -120,21 +122,7 @@ public class TimeBookingResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<TimeBooking> result = timeBookingRepository
-            .findById(timeBooking.getId())
-            .map(
-                existingTimeBooking -> {
-                    if (timeBooking.getBooking() != null) {
-                        existingTimeBooking.setBooking(timeBooking.getBooking());
-                    }
-                    if (timeBooking.getPersonalNumber() != null) {
-                        existingTimeBooking.setPersonalNumber(timeBooking.getPersonalNumber());
-                    }
-
-                    return existingTimeBooking;
-                }
-            )
-            .map(timeBookingRepository::save);
+        Optional<TimeBooking> result = timeBookingService.partialUpdate(timeBooking);
 
         return ResponseUtil.wrapOrNotFound(
             result,
@@ -150,7 +138,7 @@ public class TimeBookingResource {
     @GetMapping("/time-bookings")
     public List<TimeBooking> getAllTimeBookings() {
         log.debug("REST request to get all TimeBookings");
-        return timeBookingRepository.findAll();
+        return timeBookingService.findAll();
     }
 
     /**
@@ -162,7 +150,7 @@ public class TimeBookingResource {
     @GetMapping("/time-bookings/{id}")
     public ResponseEntity<TimeBooking> getTimeBooking(@PathVariable Long id) {
         log.debug("REST request to get TimeBooking : {}", id);
-        Optional<TimeBooking> timeBooking = timeBookingRepository.findById(id);
+        Optional<TimeBooking> timeBooking = timeBookingService.findOne(id);
         return ResponseUtil.wrapOrNotFound(timeBooking);
     }
 
@@ -175,7 +163,7 @@ public class TimeBookingResource {
     @DeleteMapping("/time-bookings/{id}")
     public ResponseEntity<Void> deleteTimeBooking(@PathVariable Long id) {
         log.debug("REST request to delete TimeBooking : {}", id);
-        timeBookingRepository.deleteById(id);
+        timeBookingService.delete(id);
         return ResponseEntity
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
