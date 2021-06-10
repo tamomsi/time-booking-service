@@ -1,0 +1,17 @@
+
+application {
+  config {
+    baseName timeBookingService,
+    applicationType microservice,
+    packageName com.fantasy.tbs,
+    authenticationType jwt,
+    prodDatabaseType mysql,
+    devDatabaseType h2Disk
+  }
+  entities TimeBooking
+}
+
+entity TimeBooking {
+	booking ZonedDateTime,
+    personalNumber String
+}
