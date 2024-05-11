@@ -85,14 +85,26 @@ public class TimeBookingServiceImpl implements TimeBookingService {
         timeBookingRepository.save(timeBookMapper.toTimeBooking(timeBookDTO));
     }
 
-    @Override
-    public Duration calculateWorkingTimeForDay(Long userId, LocalDate date) {
-        log.debug("Calculating working time for user {} on date {}", userId, date);
+ @Override
+public Duration calculateWorkingTimeForDay(Long userId, LocalDate date) {
+    log.debug("Calculating working time for user {} on date {}", userId, date);
 
-        // TODO: Query the database for time bookings for the specified user and date
+    // Query the database for time bookings for the specified user and date
+    // TODO: Implement logic to query the database for time bookings for the specified user and date
+    List<TimeBooking> bookings = timeBookingRepository.findByUserIdAndDate(userId, date);
 
-        // TODO: Calculate the total working time by summing up the durations of all time bookings for that day
-        
-        return null; // Placeholder return statement
+    // Calculate the total working time by summing up the durations of all time bookings for that day
+    // TODO: Implement logic to calculate the total working time by summing up the durations of all time bookings for that day
+    Duration totalWorkingTime = Duration.ZERO;
+    for (TimeBooking booking : bookings) {
+        // Ensure both start time and end time are available
+        if (booking.getStartTime() != null && booking.getEndTime() != null) {
+            Duration bookingDuration = Duration.between(booking.getStartTime(), booking.getEndTime());
+            totalWorkingTime = totalWorkingTime.plus(bookingDuration);
+        }
     }
+
+    // Return the total working time as a Duration object
+    return totalWorkingTime;
+}
 }
