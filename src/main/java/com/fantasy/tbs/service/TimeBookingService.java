@@ -65,3 +65,4 @@ public interface TimeBookingService {
      */
     Duration calculateWorkingTimeForDay(Long userId, LocalDate date); // TODO: Implement logic to handle edge cases such as no time bookings for the user or date
 }
+
