@@ -89,19 +89,10 @@ public class TimeBookingServiceImpl implements TimeBookingService {
     public Duration calculateWorkingTimeForDay(Long userId, LocalDate date) {
         log.debug("Calculating working time for user {} on date {}", userId, date);
 
-        // Get all time bookings for the user on the specified date
-        List<TimeBooking> timeBookings = timeBookingRepository.findByUserIdAndDate(userId, date);
+        // TODO: Query the database for time bookings for the specified user and date
 
-        // Calculate total working time
-        Duration totalWorkingTime = Duration.ZERO;
-        for (TimeBooking timeBooking : timeBookings) {
-            ZonedDateTime startTime = timeBooking.getStartTime();
-            ZonedDateTime endTime = timeBooking.getEndTime();
-            if (startTime != null && endTime != null) {
-                totalWorkingTime = totalWorkingTime.plus(Duration.between(startTime, endTime));
-            }
-        }
-
-        return totalWorkingTime;
+        // TODO: Calculate the total working time by summing up the durations of all time bookings for that day
+        
+        return null; // Placeholder return statement
     }
 }
